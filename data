@@ -1,0 +1,146 @@
+# Imported necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Accessed the Superstore dataset
+data = pd.read_csv("SampleSuperstore.csv")
+
+# Data Cleaning / Remove duplicates
+data.drop_duplicates(inplace=True)
+
+# Selected important columns for analysis
+important_columns = [
+    'Ship Mode', 'Segment', 'Country', 'City', 'State', 'Region',
+    'Category', 'Sub-Category', 'Sales', 'Quantity', 'Discount', 'Profit'
+]
+data = data[important_columns]
+
+# Data Understanding
+
+# To display the first few rows of the dataset
+print("First 5 rows of the dataset:")
+print(data.head())
+
+# Basic statistics about the dataset
+print("\nBasic statistics of the dataset:")
+print(data.describe())
+
+# To Check data types and missing values
+print("\nData types and missing values:")
+print(data.info())
+
+# Check unique values in categorical columns
+categorical_columns = ['Ship Mode', 'Segment', 'Country', 'City', 'State', 'Region', 'Category', 'Sub-Category']
+for col in categorical_columns:
+    unique_values = data[col].unique()
+    print(f"Unique values in {col}:")
+    print(unique_values)
+
+# Check for potential outliers using box plots for numeric columns
+numeric_columns = ['Sales', 'Quantity', 'Discount', 'Profit']
+plt.figure(figsize=(12, 8))
+for i, col in enumerate(numeric_columns, 1):
+    plt.subplot(2, 2, i)
+    sns.boxplot(data=data, y=col)
+    plt.title(f'Box Plot of {col}')
+plt.tight_layout()
+plt.show()
+
+# Relationship analysis using a pair plot for numeric columns
+sns.pairplot(data=data[numeric_columns])
+plt.suptitle("Relationship Analysis (Pair Plot) for Numeric Columns", y=1.02)
+plt.show()
+
+# Main Analysis
+
+# Calculate and display total profit and profit margin
+total_profit = data['Profit'].sum()
+total_sales = data['Sales'].sum()
+profit_margin = (total_profit / total_sales) * 100
+print(f"Total Profit: ${total_profit:.2f}")
+print(f"Profit Margin: {profit_margin:.2f}%")
+
+# Calculate and display total cost (Sales - Profit)
+data['Cost'] = data['Sales'] - data['Profit']
+total_cost = data['Cost'].sum()
+print(f"Total Cost: ${total_cost:.2f}")
+
+# Visualizations
+
+plt.figure(figsize=(15, 12))
+
+# 1. Profit by Customer Segment
+plt.subplot(3, 3, 1)
+segment_profit = data.groupby('Segment')['Profit'].sum().sort_values(ascending=False)
+sns.barplot(x=segment_profit.index, y=segment_profit.values, palette='viridis')
+plt.title('Profit by Customer Segment')
+plt.xlabel('Customer Segment')
+plt.ylabel('Total Profit')
+# Takeaway: Segment Consumer contributes the most to profit.
+
+# 2. Profit by Region
+plt.subplot(3, 3, 2)
+region_profit = data.groupby('Region')['Profit'].sum().sort_values(ascending=False)
+sns.barplot(x=region_profit.index, y=region_profit.values, palette='coolwarm')
+plt.title('Profit by Region')
+plt.xlabel('Region')
+plt.ylabel('Total Profit')
+# Takeaway: The West region generates the highest profit.
+
+# 3. Profit by Product Category
+plt.subplot(3, 3, 3)
+category_profit = data.groupby('Category')['Profit'].sum().sort_values(ascending=False)
+sns.barplot(x=category_profit.values, y=category_profit.index, palette='Set1')
+plt.title('Profit by Product Category')
+plt.xlabel('Total Profit')
+plt.ylabel('Product Category')
+# Takeaway: Technology category leads in terms of profit.
+
+# 4. Profit by Product Sub-Category
+plt.subplot(3, 3, 4)
+subcategory_profit = data.groupby('Sub-Category')['Profit'].sum().sort_values(ascending=False)
+sns.barplot(x=subcategory_profit.values, y=subcategory_profit.index, palette='Set2')
+plt.title('Profit by Product Sub-Category')
+plt.xlabel('Total Profit')
+plt.ylabel('Product Sub-Category')
+# Takeaway: Phones and Chairs sub-categories have high profit.
+
+# 5. Scatter Plot: Sales vs. Profit (Category-wise)
+plt.subplot(3, 3, 5)
+sns.scatterplot(x='Sales', y='Profit', hue='Category', data=data, palette='Set1')
+plt.title('Sales vs. Profit (Category-wise)')
+plt.xlabel('Sales')
+plt.ylabel('Profit')
+# Takeaway: Technology products show a positive correlation between sales and profit.
+
+# 6. Profit by State (Top 15)
+plt.subplot(3, 3, 6)
+state_profit = data.groupby('State')['Profit'].sum().sort_values(ascending=False).head(15)
+sns.barplot(x=state_profit.index, y=state_profit.values, palette='coolwarm')
+plt.title('Top 15 States by Profit')
+plt.xlabel('State')
+plt.ylabel('Total Profit')
+plt.xticks(rotation=90)
+# Takeaway: States like California and New York are profitable.
+
+# 7. Profit by City (Top 15)
+plt.subplot(3, 3, 7)
+city_profit = data.groupby('City')['Profit'].sum().sort_values(ascending=False).head(15)
+sns.barplot(x=city_profit.values, y=city_profit.index, palette='coolwarm')
+plt.title('Top 15 Cities by Profit')
+plt.xlabel('Total Profit')
+plt.ylabel('City')
+# Takeaway: Identified top performing cities in terms of profit.
+
+# 8. Geographic Analysis: Region-wise Sales and Profit
+plt.subplot(3, 3, 8)
+sns.barplot(x='Region', y='Sales', data=data, estimator=sum, palette='Blues', label='Sales')
+sns.barplot(x='Region', y='Profit', data=data, estimator=sum, palette='Reds', label='Profit')
+plt.title('Geographic Analysis: Region-wise Sales and Profit')
+plt.xlabel('Region')
+plt.ylabel('Total')
+plt.legend()
+# Takeaway: Analyzed the relationship between sales and profit across regions.
+
+
